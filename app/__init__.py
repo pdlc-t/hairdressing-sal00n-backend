@@ -1,15 +1,35 @@
-from flask import Flask
+# app/__init__.py
 
+from flask import Flask
 from config import Config
 from app.extensions import db
+from app.json_provider import CustomJSONProvider
 
 def create_app(config_class=Config):
     app = Flask(__name__)
     app.config.from_object(config_class)
 
+    # podmieniamy provider
+    app.json_provider_class = CustomJSONProvider
+    # po stworzeniu instancji JSONProvider:
+    app.json = app.json_provider_class(app)
+    # inicjalizacja rozszerzeń
     db.init_app(app)
 
-    from app.main import bp as main_bp
-    app.register_blueprint(main_bp)
+    # rejestracja blueprintów
+    from app.main.hairdressers import bp as hairdressers_bp
+    app.register_blueprint(hairdressers_bp, url_prefix='/hairdressers')
+    from app.main.services import bp as services_bp
+    app.register_blueprint(services_bp, url_prefix='/services')
+    from app.main.products import bp as products_bp
+    app.register_blueprint(products_bp, url_prefix='/products')
+
+    with app.app_context():
+        # tworzymy tabele jeśli nie istnieją
+        db.create_all()
+
+        # **Import i wywołanie seedowania**
+        from app import seed
+        seed.seed_database()
 
     return app
