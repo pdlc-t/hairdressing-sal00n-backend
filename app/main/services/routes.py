@@ -1,9 +1,12 @@
 from flask import request, jsonify, abort
+
+from app.auth import require_auth
 from app.main.services import bp
 from app.extensions import db
 from app.main.models.service import Service
 
 @bp.route('/', methods=['GET'])
+@require_auth
 def service_list():
     services = Service.query.all()
     service_list = []
@@ -19,6 +22,7 @@ def service_list():
     return jsonify(service_list), 200
 
 @bp.route('/<int:id>', methods=['GET'])
+@require_auth
 def get_service(id):
     svc = Service.query.get_or_404(id)
     return jsonify({
@@ -31,6 +35,7 @@ def get_service(id):
     }), 200
 
 @bp.route('/', methods=['POST'])
+@require_auth
 def create_service():
     data = request.get_json() or {}
     required = ['serviceName', 'price', 'time', 'availability', 'description']
@@ -55,6 +60,7 @@ def create_service():
     }), 201
 
 @bp.route('/<int:id>', methods=['PUT'])
+@require_auth
 def update_service(id):
     svc = Service.query.get_or_404(id)
     data = request.get_json() or {}
@@ -72,6 +78,7 @@ def update_service(id):
     }), 200
 
 @bp.route('/<int:id>', methods=['DELETE'])
+@require_auth
 def delete_service(id):
     svc = Service.query.get_or_404(id)
     db.session.delete(svc)

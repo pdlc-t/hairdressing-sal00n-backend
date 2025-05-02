@@ -1,10 +1,13 @@
 from flask import request, jsonify, abort
+
+from app.auth import require_auth
 from app.main.hairdressers import bp
 from app.extensions import db
 from app.main.models.hairdresser import Hairdresser
 import json
 
 @bp.route('/', methods=['GET'])
+@require_auth
 def hairdresser_list():
     hairdressers = Hairdresser.query.all()
     result = []
@@ -20,6 +23,7 @@ def hairdresser_list():
     return jsonify(result), 200
 
 @bp.route('/<int:id>', methods=['GET'])
+@require_auth
 def get_hairdresser(id):
     hd = Hairdresser.query.get_or_404(id)
     return jsonify({
@@ -31,6 +35,7 @@ def get_hairdresser(id):
     }), 200
 
 @bp.route('/', methods=['POST'])
+@require_auth
 def create_hairdresser():
     data = request.get_json() or {}
     required = ['firstName', 'lastName', 'specialties', 'rating']
@@ -53,6 +58,7 @@ def create_hairdresser():
     }), 201
 
 @bp.route('/<int:id>', methods=['PUT'])
+@require_auth
 def update_hairdresser(id):
     hd = Hairdresser.query.get_or_404(id)
     data = request.get_json() or {}
@@ -74,6 +80,7 @@ def update_hairdresser(id):
     }), 200
 
 @bp.route('/<int:id>', methods=['DELETE'])
+@require_auth
 def delete_hairdresser(id):
     hd = Hairdresser.query.get_or_404(id)
     db.session.delete(hd)

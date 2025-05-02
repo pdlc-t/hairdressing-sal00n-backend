@@ -9,3 +9,4 @@ class Config:
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     JSON_AS_ASCII = False  # ważne: pozwala na prawidłowe polskie znaki
     JSON_SORT_KEYS = False  # opcjonalnie: zachowaj oryginalną kolejność pól
+    API_TOKEN = os.environ.get('API_TOKEN', 'Niger')

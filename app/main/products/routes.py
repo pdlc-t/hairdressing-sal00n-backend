@@ -1,9 +1,12 @@
 from flask import request, jsonify, abort
+
+from app.auth import require_auth
 from app.main.products import bp
 from app.extensions import db
 from app.main.models.product import Product
 
 @bp.route('/', methods=['GET'])
+@require_auth
 def product_list():
     products = Product.query.all()
     product_list = []
@@ -19,6 +22,7 @@ def product_list():
     return jsonify(product_list), 200
 
 @bp.route('/<int:id>', methods=['GET'])
+@require_auth
 def get_product(id):
     prod = Product.query.get_or_404(id)
     return jsonify({
@@ -31,6 +35,7 @@ def get_product(id):
     }), 200
 
 @bp.route('/', methods=['POST'])
+@require_auth
 def create_product():
     data = request.get_json() or {}
     required = ['productName', 'price', 'amount', 'producer', 'description']
@@ -55,6 +60,7 @@ def create_product():
     }), 201
 
 @bp.route('/<int:id>', methods=['PUT'])
+@require_auth
 def update_product(id):
     prod = Product.query.get_or_404(id)
     data = request.get_json() or {}
@@ -72,6 +78,7 @@ def update_product(id):
     }), 200
 
 @bp.route('/<int:id>', methods=['DELETE'])
+@require_auth
 def delete_product(id):
     prod = Product.query.get_or_404(id)
     db.session.delete(prod)

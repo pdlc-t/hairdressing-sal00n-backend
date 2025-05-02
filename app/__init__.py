@@ -1,6 +1,8 @@
 # app/__init__.py
 
 from flask import Flask
+from flask_cors import CORS
+
 from config import Config
 from app.extensions import db
 from app.json_provider import CustomJSONProvider
@@ -13,6 +15,8 @@ def create_app(config_class=Config):
     app.json_provider_class = CustomJSONProvider
     # po stworzeniu instancji JSONProvider:
     app.json = app.json_provider_class(app)
+    # pozwól na CORS ze wszystkich domen (lub tylko z 3000)
+    CORS(app, resources={r"/*": {"origins": "http://localhost:3000"}})
     # inicjalizacja rozszerzeń
     db.init_app(app)
 
