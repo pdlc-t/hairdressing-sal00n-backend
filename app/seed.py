@@ -1,9 +1,12 @@
 # seed.py
 import json
+from datetime import datetime
 from app.extensions import db
 from app.main.models.hairdresser import Hairdresser
 from app.main.models.service import Service
 from app.main.models.product import Product
+from app.main.models.client import Client
+from app.main.models.appointment import Appointment
 
 # Sample data
 HAIRDRESSERS_JSON = [
@@ -52,6 +55,30 @@ PRODUCTS_JSON = [
   {"productName": "Maska XYZ", "price": 25, "amount": 10, "producer": "XYZ Co.", "description": "Przykładowy opis maski."}
 ]
 
+CLIENTS_JSON = [
+    {"first_name": "fufuk", "second_name": "gnufuk"},
+    {"first_name": "Liora", "second_name": "Skydancer"},
+    {"first_name": "Taren", "second_name": "Stoneveil"},
+    {"first_name": "Elira", "second_name": "Moondust"},
+    {"first_name": "Caelum", "second_name": "Nightbloom"},
+    {"first_name": "Sylas", "second_name": "Ashwhisper"}
+]
+
+APPOINTMENTS_JSON = [
+    {"client_id": 3, "service_id": 2, "date": "2025-05-10T10:00:00+00:00"},
+    {"client_id": 1, "service_id": 1, "date": "2025-05-10T10:00:00+00:00"},
+    {"client_id": 2, "service_id": 3, "date": "2025-05-10T10:00:00+00:00"},
+    {"client_id": 4, "service_id": 2, "date": "2025-05-10T10:00:00+00:00"},
+    {"client_id": 5, "service_id": 1, "date": "2025-05-10T10:00:00+00:00"},
+    {"client_id": 6, "service_id": 4, "date": "2025-04-30T10:00:00+00:00"},
+    {"client_id": 2, "service_id": 2, "date": "2025-04-30T10:00:00+00:00"},
+    {"client_id": 1, "service_id": 4, "date": "2025-04-30T10:00:00+00:00"},
+    {"client_id": 3, "service_id": 3, "date": "2025-04-30T10:00:00+00:00"},
+    {"client_id": 4, "service_id": 1, "date": "2025-05-12T10:00:00+00:00"},
+    {"client_id": 6, "service_id": 2, "date": "2025-05-12T10:00:00+00:00"}
+]
+
+
 def seed_database():
     """Zasiej przykładowe dane, ale tylko jeśli tabela Hairdresser jest pusta."""
     if Hairdresser.query.first():
@@ -88,6 +115,23 @@ def seed_database():
             description = entry['description']
         )
         db.session.add(prod)
+
+    for entry in CLIENTS_JSON:
+        client = Client(
+            first_name = entry['first_name'],
+            second_name = entry['second_name']
+        )
+        db.session.add(client)
+
+    db.session.commit()
+
+    for entry in APPOINTMENTS_JSON:
+        appointment = Appointment(
+            client_id = entry['client_id'],
+            service_id = entry['service_id'],
+            date = datetime.fromisoformat(entry['date'])
+        )
+        db.session.add(appointment)
 
     db.session.commit()
     print("✅ Baza została zasilona przykładowymi danymi.")

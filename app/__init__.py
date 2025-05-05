@@ -7,6 +7,9 @@ from config import Config
 from app.extensions import db
 from app.json_provider import CustomJSONProvider
 
+# temporarily as there is not blueprint importing client yet
+from app.main.models.client import Client
+
 def create_app(config_class=Config):
     app = Flask(__name__)
     app.config.from_object(config_class)
@@ -27,6 +30,9 @@ def create_app(config_class=Config):
     app.register_blueprint(services_bp, url_prefix='/services')
     from app.main.products import bp as products_bp
     app.register_blueprint(products_bp, url_prefix='/products')
+
+    from app.main.appointments import bp as appointments_bp
+    app.register_blueprint(appointments_bp, url_prefix='/appointments')
 
     with app.app_context():
         # tworzymy tabele jeśli nie istnieją
