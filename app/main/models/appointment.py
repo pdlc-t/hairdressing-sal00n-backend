@@ -8,7 +8,7 @@ class Appointment(db.Model):
     client_id = db.Column(db.Integer, db.ForeignKey('clients.id'), nullable=False)
     service_id = db.Column(db.Integer, db.ForeignKey('services.id'), nullable=False)
     date = db.Column(db.DateTime, nullable=False, default=datetime.utcnow())
-    slot = db.Column(db.Integer, nullable=False)
+    time_slot = db.Column(db.Integer, nullable=False)
 
     service = db.relationship('Service')
     client = db.relationship('Client')
@@ -18,5 +18,6 @@ class Appointment(db.Model):
             "id": self.id,
             "client": f"{self.client.first_name} {self.client.second_name}",
             "service_name": self.service.serviceName,
-            "date": self.date.isoformat()
+            "date": self.date.isoformat(),
+            "time_slot": self.time_slot
         }

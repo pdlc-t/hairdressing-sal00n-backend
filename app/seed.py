@@ -56,26 +56,26 @@ PRODUCTS_JSON = [
 ]
 
 CLIENTS_JSON = [
-    {"first_name": "fufuk", "second_name": "gnufuk"},
-    {"first_name": "Liora", "second_name": "Skydancer"},
-    {"first_name": "Taren", "second_name": "Stoneveil"},
-    {"first_name": "Elira", "second_name": "Moondust"},
-    {"first_name": "Caelum", "second_name": "Nightbloom"},
-    {"first_name": "Sylas", "second_name": "Ashwhisper"}
+    {"first_name": "fufuk", "second_name": "gnufuk", "login": "login1", "password_hash": "passwd1"},
+    {"first_name": "Liora", "second_name": "Skydancer", "login": "login2", "password_hash": "passwd2"},
+    {"first_name": "Taren", "second_name": "Stoneveil", "login": "login3", "password_hash": "passwd3"},
+    {"first_name": "Elira", "second_name": "Moondust", "login": "login4", "password_hash": "passwd4"},
+    {"first_name": "Caelum", "second_name": "Nightbloom", "login": "login5", "password_hash": "passwd5"},
+    {"first_name": "Sylas", "second_name": "Ashwhisper", "login": "login6", "password_hash": "passwd6"}
 ]
 
 APPOINTMENTS_JSON = [
-    {"client_id": 3, "service_id": 2, "date": "2025-05-10T10:00:00+00:00"},
-    {"client_id": 1, "service_id": 1, "date": "2025-05-10T10:00:00+00:00"},
-    {"client_id": 2, "service_id": 3, "date": "2025-05-10T10:00:00+00:00"},
-    {"client_id": 4, "service_id": 2, "date": "2025-05-10T10:00:00+00:00"},
-    {"client_id": 5, "service_id": 1, "date": "2025-05-10T10:00:00+00:00"},
-    {"client_id": 6, "service_id": 4, "date": "2025-04-30T10:00:00+00:00"},
-    {"client_id": 2, "service_id": 2, "date": "2025-04-30T10:00:00+00:00"},
-    {"client_id": 1, "service_id": 4, "date": "2025-04-30T10:00:00+00:00"},
-    {"client_id": 3, "service_id": 3, "date": "2025-04-30T10:00:00+00:00"},
-    {"client_id": 4, "service_id": 1, "date": "2025-05-12T10:00:00+00:00"},
-    {"client_id": 6, "service_id": 2, "date": "2025-05-12T10:00:00+00:00"}
+    {"client_id": 3, "service_id": 2, "date": "2025-05-10T10:00:00+00:00", "time_slot": 1},
+    {"client_id": 1, "service_id": 1, "date": "2025-05-10T10:00:00+00:00", "time_slot": 2},
+    {"client_id": 2, "service_id": 3, "date": "2025-05-10T10:00:00+00:00", "time_slot": 3},
+    {"client_id": 4, "service_id": 2, "date": "2025-05-10T10:00:00+00:00", "time_slot": 4},
+    {"client_id": 5, "service_id": 1, "date": "2025-05-10T10:00:00+00:00", "time_slot": 5},
+    {"client_id": 6, "service_id": 4, "date": "2025-04-30T10:00:00+00:00", "time_slot": 1},
+    {"client_id": 2, "service_id": 2, "date": "2025-04-30T10:00:00+00:00", "time_slot": 2},
+    {"client_id": 1, "service_id": 4, "date": "2025-04-30T10:00:00+00:00", "time_slot": 3},
+    {"client_id": 3, "service_id": 3, "date": "2025-04-30T10:00:00+00:00", "time_slot": 4},
+    {"client_id": 4, "service_id": 1, "date": "2025-05-12T10:00:00+00:00", "time_slot": 1},
+    {"client_id": 6, "service_id": 2, "date": "2025-05-12T10:00:00+00:00", "time_slot": 2}
 ]
 
 
@@ -119,7 +119,9 @@ def seed_database():
     for entry in CLIENTS_JSON:
         client = Client(
             first_name = entry['first_name'],
-            second_name = entry['second_name']
+            second_name = entry['second_name'],
+            login = entry['login'],
+            password_hash = entry['password_hash']
         )
         db.session.add(client)
 
@@ -129,7 +131,8 @@ def seed_database():
         appointment = Appointment(
             client_id = entry['client_id'],
             service_id = entry['service_id'],
-            date = datetime.fromisoformat(entry['date'])
+            date = datetime.fromisoformat(entry['date']),
+            time_slot = entry['time_slot']
         )
         db.session.add(appointment)
 
