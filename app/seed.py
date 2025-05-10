@@ -7,39 +7,61 @@ from app.main.models.service import Service
 from app.main.models.product import Product
 from app.main.models.client import Client
 from app.main.models.appointment import Appointment
+from app.main.models.comment import Comment
 
 # Sample data
 HAIRDRESSERS_JSON = [
-  {
-    "firstName": "Anna",
-    "lastName": "Kowalska",
-    "specialties": ["strzyżenie męskie", "strzyżenie damskie", "farbowanie"],
-    "rating": 5
-  },
-  {
-    "firstName": "Amelia",
-    "lastName": "Brogowicz",
-    "specialties": ["strzyżenie męskie", "manicure"],
-    "rating": 5
-  },
-  {
-    "firstName": "Ewa",
-    "lastName": "Wiśniewska",
-    "specialties": ["strzyżenie damskie", "farbowanie", "manicure"],
-    "rating": 3
-  },
-  {
-    "firstName": "Tomasz",
-    "lastName": "Zieliński",
-    "specialties": ["strzyżenie męskie", "strzyżenie damskie"],
-    "rating": 4
-  },
-  {
-    "firstName": "Katarzyna",
-    "lastName": "Lewandowska",
-    "specialties": ["farbowanie", "manicure"],
-    "rating": 5
-  }
+    {
+        "firstName": "Anna",
+        "lastName": "Kowalska",
+        "specialties": ["strzyżenie męskie", "strzyżenie damskie", "farbowanie"],
+        "rating": 5
+    },
+    {
+        "firstName": "Amelia",
+        "lastName": "Brogowicz",
+        "specialties": ["strzyżenie męskie", "manicure"],
+        "rating": 5
+    },
+    {
+        "firstName": "Ewa",
+        "lastName": "Wiśniewska",
+        "specialties": ["strzyżenie damskie", "farbowanie", "manicure"],
+        "rating": 3
+    },
+    {
+        "firstName": "Tomasz",
+        "lastName": "Zieliński",
+        "specialties": ["strzyżenie męskie", "strzyżenie damskie"],
+        "rating": 4
+    },
+    {
+        "firstName": "Katarzyna",
+        "lastName": "Lewandowska",
+        "specialties": ["farbowanie", "manicure"],
+        "rating": 5
+    }
+]
+
+# Comments for each hairdresser, parallel by index
+COMMENTS_JSON = [
+    [  # for Anna
+        {"author": "Jan Kowalski", "content": "Świetne cięcie, polecam!"},
+        {"author": "Anna Nowak",   "content": "Bardzo miła obsługa."}
+    ],
+    [  # for Amelia
+        {"author": "Marcin Wiśniewski", "content": "Profesjonalnie i szybko."}
+    ],
+    [  # for Ewa
+        # no comments
+    ],
+    [  # for Tomasz
+        {"author": "Kasia Lewandowska", "content": "Polecam, świetne farbowanie!"},
+        {"author": "Piotr Wójcik",      "content": "Mogłoby być nieco tańsze."}
+    ],
+    [  # for Katarzyna
+        {"author": "Magda Zielińska", "content": "Super manicure."}
+    ]
 ]
 
 SERVICES_JSON = [
@@ -84,8 +106,8 @@ def seed_database():
     if Hairdresser.query.first():
         return
 
-    # fryzjerzy
-    for entry in HAIRDRESSERS_JSON:
+    # 1) Zasiewanie fryzjerów i ich komentarzy
+    for idx, entry in enumerate(HAIRDRESSERS_JSON):
         hd = Hairdresser(
             firstName=entry['firstName'],
             lastName=entry['lastName'],
@@ -93,8 +115,18 @@ def seed_database():
             rating=entry['rating']
         )
         db.session.add(hd)
+        db.session.flush()  # potrzebne, aby hd.id było dostępne od razu
 
-    # usługi
+        # dodaj komentarze
+        for c in COMMENTS_JSON[idx]:
+            comment = Comment(
+                hairdresser_id = hd.id,
+                author         = c.get('author'),
+                content        = c.get('content')
+            )
+            db.session.add(comment)
+
+    # 2) Zasiewanie usług
     for entry in SERVICES_JSON:
         svc = Service(
             serviceName   = entry['serviceName'],
