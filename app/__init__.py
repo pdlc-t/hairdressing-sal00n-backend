@@ -34,6 +34,8 @@ def create_app(config_class=Config):
     from app.main.appointments import bp as appointments_bp
     app.register_blueprint(appointments_bp, url_prefix='/appointments')
 
+    from app.main.auth_routes import auth_bp
+    app.register_blueprint(auth_bp, url_prefix='/auth')
     with app.app_context():
         # tworzymy tabele jeśli nie istnieją
         db.create_all()
