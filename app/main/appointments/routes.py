@@ -1,4 +1,7 @@
-from flask import request, jsonify, session
+from datetime import datetime, timedelta
+import jwt
+from jwt.exceptions import InvalidTokenError
+from flask import request, jsonify, current_app
 
 from app.extensions import db
 from app.main.appointments import bp
@@ -13,18 +16,31 @@ def get_appointments():
 def add_appointment():
     data = request.get_json()
 
-    if not data or not all(k in data for k in ("client_id", "service_id", "date")):
+    if not data or not all(k in data for k in ("service_id", "date", "time_slot")):
         return jsonify({'error': 'Missing required fields'}), 400
 
-    client_id = session.get('id')
-    if not client_id:
-        return jsonify({'error': 'Missing client_id - client not logged in ?...?'}), 400
+    auth_header = request.headers.get('Authorization')
+    if not auth_header or not auth_header.startswith('Bearer '):
+        return jsonify({'error': 'Missing or invalid authorization token'}), 401
+
+    token = auth_header.split(' ')[1]
+
+    try:
+        decoded_token = jwt.decode(token, current_app.config['SECRET_KEY'], algorithms=['HS256'])
+        client_id = decoded_token['user_id']
+    except InvalidTokenError:
+        return jsonify({'error': 'Invalid or expired token'}), 401
+
+    # client_id = session.get('id')
+    # if not client_id:
+    #     return jsonify({'error': 'Missing client_id - client not logged in ?...?'}), 400
 
     try:
         new_appointment = Appointment(
-            client_id = session["id"],
+            client_id = client_id,
             service_id = data['service_id'],
-            date = data['date']
+            date = datetime.fromisoformat(data['date']),
+            time_slot =  data['time_slot']
         )
         db.session.add(new_appointment)
         db.session.commit()
@@ -33,3 +49,33 @@ def add_appointment():
     except Exception as e:
         db.session.rollback()
         return jsonify({'error': 'Failed to add the appointment', 'details': str(e)}), 500
+
+@bp.route('/get-busy-time-slots', methods=['GET'])
+def get_busy_time_slots():
+    date_string = request.args.get('date')
+    print(f'Date string {date_string}')
+
+    if not date_string:
+        return jsonify({'error': 'Missing date parameter'}), 400
+
+    try:
+        target_date = datetime.fromisoformat(date_string.replace('Z', '+00:00'))
+        next_day = target_date + timedelta(days=1)
+        # date_only = parsed_date.date()
+        print(f'Date string parsed: {target_date}')
+
+        appointments = Appointment.query.filter(
+            Appointment.date >= target_date,
+            Appointment.date < next_day
+        ).all()
+
+        timeslots = { 1: True, 2: True, 3: True, 4: True, 5: True }
+
+        for appointment in appointments:
+            timeslots[appointment.time_slot] = False
+
+        return jsonify(timeslots), 200
+
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500

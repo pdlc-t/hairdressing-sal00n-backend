@@ -6,7 +6,6 @@ from app.extensions import db
 from app.main.models.service import Service
 
 @bp.route('/', methods=['GET'])
-@require_auth
 def service_list():
     services = Service.query.all()
     service_list = []
