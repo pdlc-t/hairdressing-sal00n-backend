@@ -13,6 +13,7 @@ from app.main.models.client import Client
 def create_app(config_class=Config):
     app = Flask(__name__)
     app.config.from_object(config_class)
+    #app.logger.info('USING DATABASE_URI: %s', app.config['SQLALCHEMY_DATABASE_URI'])
 
     # podmieniamy provider
     app.json_provider_class = CustomJSONProvider
