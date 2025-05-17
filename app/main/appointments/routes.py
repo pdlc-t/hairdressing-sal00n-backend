@@ -3,13 +3,11 @@ import jwt
 from jwt.exceptions import InvalidTokenError
 from flask import request, jsonify, current_app
 
-from app.auth import require_auth
 from app.extensions import db
 from app.main.appointments import bp
 from app.main.models.appointment import Appointment
 
 @bp.route('/get-appointments', methods=['GET'])
-@require_auth
 def get_appointments():
     appointments = Appointment.query.all()
     return jsonify([appointment.to_dict() for appointment in appointments])

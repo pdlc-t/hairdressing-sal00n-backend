@@ -41,8 +41,10 @@ def create_app(config_class=Config):
         # tworzymy tabele jeśli nie istnieją
         db.create_all()
 
-        # **Import i wywołanie seedowania**
-        from app import seed
-        seed.seed_database()
+        # **Import i warunkowe seedowanie** (tylko jeśli tabela Hairdresser jest pusta)
+        from app.main.models.hairdresser import Hairdresser
+        if Hairdresser.query.count() == 0:
+            from app import seed
+            seed.seed_database()
 
     return app
