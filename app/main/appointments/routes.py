@@ -79,3 +79,30 @@ def get_busy_time_slots():
 
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
+@bp.route('/<int:appointment_id>', methods=['DELETE'])
+def delete_appointment(appointment_id):
+    auth_header = request.headers.get('Authorization')
+    if not auth_header or not auth_header.startswith('Bearer '):
+        return jsonify({'error': 'Missing or invalid authorization token'}), 401
+
+    token = auth_header.split(' ')[1]
+    try:
+        decoded = jwt.decode(token, current_app.config['SECRET_KEY'], algorithms=['HS256'])
+        client_id = decoded['user_id']
+    except InvalidTokenError:
+        return jsonify({'error': 'Invalid or expired token'}), 401
+
+    appt = Appointment.query.get(appointment_id)
+    if not appt:
+        return jsonify({'error': 'Appointment not found'}), 404
+    if appt.client_id != client_id:
+        return jsonify({'error': 'Not allowed to cancel this appointment'}), 403
+
+    try:
+        db.session.delete(appt)
+        db.session.commit()
+        return jsonify({'message': 'Appointment cancelled'}), 200
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': 'Failed to cancel', 'details': str(e)}), 500
