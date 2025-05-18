@@ -3,7 +3,7 @@ from pathlib import Path
 
 # Ścieżka do katalogu głównego projektu (jeden poziom wyżej niż ten plik)
 BASE_DIR = Path(__file__).resolve().parent
-PROJECT_ROOT = BASE_DIR.parent
+PROJECT_ROOT = BASE_DIR
 
 
 class Config:
