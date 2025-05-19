@@ -1,5 +1,7 @@
 # seed.py
+
 import json
+import random
 from datetime import datetime
 from app.extensions import db
 from app.main.models.hairdresser import Hairdresser
@@ -43,7 +45,6 @@ HAIRDRESSERS_JSON = [
     }
 ]
 
-# Comments for each hairdresser, parallel by index
 COMMENTS_JSON = [
     [  # for Anna
         {"author": "Jan Kowalski", "content": "Świetne cięcie, polecam!"},
@@ -65,25 +66,25 @@ COMMENTS_JSON = [
 ]
 
 SERVICES_JSON = [
-  {"serviceName": "Strzyżenie Męskie", "price": 50, "time": 30, "availability": "dostępne", "description": "Przykładowy opis usługi strzyżenia męskiego."},
-  {"serviceName": "Strzyżenie Damskie", "price": 70, "time": 45, "availability": "dostępne", "description": "Przykładowy opis usługi strzyżenia damskiego."},
-  {"serviceName": "Manicure", "price": 60, "time": 40, "availability": "dostępne", "description": "Przykładowy opis usługi manicure."},
-  {"serviceName": "Farbowanie włosów długich", "price": 120, "time": 90, "availability": "dostępne", "description": "Przykładowy opis usługi farbowania włosów długich."}
+    {"serviceName": "Strzyżenie Męskie", "price": 50,  "time": 30, "availability": "dostępne", "description": "Opis strzyżenia męskiego."},
+    {"serviceName": "Strzyżenie Damskie","price": 70,  "time": 45, "availability": "dostępne", "description": "Opis strzyżenia damskiego."},
+    {"serviceName": "Manicure",          "price": 60,  "time": 40, "availability": "dostępne", "description": "Opis manicure."},
+    {"serviceName": "Farbowanie włosów","price": 120, "time": 90, "availability": "dostępne", "description": "Opis farbowania włosów."}
 ]
 
 PRODUCTS_JSON = [
-  {"productName": "Szampon DX2", "price": 10, "amount": 30, "producer": "DX2.sp.zoo", "description": "Przykładowy opis szamponu."},
-  {"productName": "Odżywka ABC", "price": 15, "amount": 20, "producer": "ABC Ltd.", "description": "Przykładowy opis odżywki."},
-  {"productName": "Maska XYZ", "price": 25, "amount": 10, "producer": "XYZ Co.", "description": "Przykładowy opis maski."}
+    {"productName": "Szampon DX2", "price": 10, "amount": 30, "producer": "DX2.sp.zoo", "description": "Opis szamponu."},
+    {"productName": "Odżywka ABC", "price": 15, "amount": 20, "producer": "ABC Ltd.",     "description": "Opis odżywki."},
+    {"productName": "Maska XYZ",   "price": 25, "amount": 10, "producer": "XYZ Co.",      "description": "Opis maski."}
 ]
 
 CLIENTS_JSON = [
-    {"first_name": "fufuk", "second_name": "gnufuk", "login": "login1", "password_hash": "passwd1"},
-    {"first_name": "Liora", "second_name": "Skydancer", "login": "login2", "password_hash": "passwd2"},
-    {"first_name": "Taren", "second_name": "Stoneveil", "login": "login3", "password_hash": "passwd3"},
-    {"first_name": "Elira", "second_name": "Moondust", "login": "login4", "password_hash": "passwd4"},
-    {"first_name": "Caelum", "second_name": "Nightbloom", "login": "login5", "password_hash": "passwd5"},
-    {"first_name": "Sylas", "second_name": "Ashwhisper", "login": "login6", "password_hash": "passwd6"}
+    {"first_name": "fufuk",  "second_name": "gnufuk",    "login": "login1", "password_hash": "passwd1"},
+    {"first_name": "Liora",  "second_name": "Skydancer", "login": "login2", "password_hash": "passwd2"},
+    {"first_name": "Taren",  "second_name": "Stoneveil", "login": "login3", "password_hash": "passwd3"},
+    {"first_name": "Elira",  "second_name": "Moondust",  "login": "login4", "password_hash": "passwd4"},
+    {"first_name": "Caelum", "second_name": "Nightbloom","login": "login5", "password_hash": "passwd5"},
+    {"first_name": "Sylas",  "second_name": "Ashwhisper","login": "login6", "password_hash": "passwd6"}
 ]
 
 APPOINTMENTS_JSON = [
@@ -102,11 +103,11 @@ APPOINTMENTS_JSON = [
 
 
 def seed_database():
-    """Zasiej przykładowe dane, ale tylko jeśli tabela Hairdresser jest pusta."""
+    """Zasiej przykładowe dane tylko raz (gdy tabela Hairdresser jest pusta)."""
     if Hairdresser.query.first():
         return
 
-    # 1) Zasiewanie fryzjerów i ich komentarzy
+    # 1) Fryzjerzy + komentarze
     for idx, entry in enumerate(HAIRDRESSERS_JSON):
         hd = Hairdresser(
             firstName=entry['firstName'],
@@ -115,58 +116,63 @@ def seed_database():
             rating=entry['rating']
         )
         db.session.add(hd)
-        db.session.flush()  # potrzebne, aby hd.id było dostępne od razu
+        db.session.flush()  # aby hd.id było od razu dostępne
 
-        # dodaj komentarze
         for c in COMMENTS_JSON[idx]:
             comment = Comment(
-                hairdresser_id = hd.id,
-                author         = c.get('author'),
-                content        = c.get('content')
+                hairdresser_id=hd.id,
+                author=c['author'],
+                content=c['content']
             )
             db.session.add(comment)
 
-    # 2) Zasiewanie usług
+    # 2) Usługi
     for entry in SERVICES_JSON:
         svc = Service(
-            serviceName   = entry['serviceName'],
-            price         = entry['price'],
-            time          = entry['time'],
-            availability  = entry['availability'],
-            description   = entry['description']
+            serviceName=entry['serviceName'],
+            price=entry['price'],
+            time=entry['time'],
+            availability=entry['availability'],
+            description=entry['description']
         )
         db.session.add(svc)
 
-    # produkty
+    # 3) Produkty
     for entry in PRODUCTS_JSON:
         prod = Product(
-            productName = entry['productName'],
-            price       = entry['price'],
-            amount      = entry['amount'],
-            producer    = entry['producer'],
-            description = entry['description']
+            productName=entry['productName'],
+            price=entry['price'],
+            amount=entry['amount'],
+            producer=entry['producer'],
+            description=entry['description']
         )
         db.session.add(prod)
 
+    # 4) Klienci
     for entry in CLIENTS_JSON:
         client = Client(
-            first_name = entry['first_name'],
-            second_name = entry['second_name'],
-            login = entry['login'],
-            password_hash = entry['password_hash']
+            first_name=entry['first_name'],
+            second_name=entry['second_name'],
+            login=entry['login'],
+            password_hash=entry['password_hash']
         )
         db.session.add(client)
 
     db.session.commit()
 
+    # 5) Wizyty z losowym fryzjerem
+    hairdressers = Hairdresser.query.all()
     for entry in APPOINTMENTS_JSON:
-        appointment = Appointment(
-            client_id = entry['client_id'],
-            service_id = entry['service_id'],
-            date = datetime.fromisoformat(entry['date']),
-            time_slot = entry['time_slot']
+        chosen = random.choice(hairdressers)
+        appt = Appointment(
+            client_id=entry['client_id'],
+            service_id=entry['service_id'],
+            hairdresser_id=chosen.id,
+            date=datetime.fromisoformat(entry['date']),
+            time_slot=entry['time_slot']
         )
-        db.session.add(appointment)
+        db.session.add(appt)
 
     db.session.commit()
+
     print("✅ Baza została zasilona przykładowymi danymi.")

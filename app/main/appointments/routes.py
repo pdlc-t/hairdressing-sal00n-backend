@@ -1,3 +1,4 @@
+import random
 from datetime import datetime, timedelta
 import jwt
 from jwt.exceptions import InvalidTokenError
@@ -6,6 +7,8 @@ from flask import request, jsonify, current_app
 from app.extensions import db
 from app.main.appointments import bp
 from app.main.models.appointment import Appointment
+from app.main.models.hairdresser import Hairdresser
+
 
 @bp.route('/get-appointments', methods=['GET'])
 def get_appointments():
@@ -24,31 +27,44 @@ def add_appointment():
         return jsonify({'error': 'Missing or invalid authorization token'}), 401
 
     token = auth_header.split(' ')[1]
-
     try:
-        decoded_token = jwt.decode(token, current_app.config['SECRET_KEY'], algorithms=['HS256'])
+        decoded_token = jwt.decode(
+            token,
+            current_app.config['SECRET_KEY'],
+            algorithms=['HS256']
+        )
         client_id = decoded_token['user_id']
     except InvalidTokenError:
         return jsonify({'error': 'Invalid or expired token'}), 401
 
-    # client_id = session.get('id')
-    # if not client_id:
-    #     return jsonify({'error': 'Missing client_id - client not logged in ?...?'}), 400
+    # losowy fryzjer z puli
+    hairdressers = Hairdresser.query.all()
+    if not hairdressers:
+        return jsonify({'error': 'No hairdressers available'}), 500
+    chosen_hairdresser = random.choice(hairdressers)
 
     try:
         new_appointment = Appointment(
-            client_id = client_id,
-            service_id = data['service_id'],
-            date = datetime.fromisoformat(data['date']),
-            time_slot =  data['time_slot']
+            client_id=client_id,
+            service_id=data['service_id'],
+            hairdresser_id=chosen_hairdresser.id,        # przypisanie fryzjera
+            date=datetime.fromisoformat(data['date']),
+            time_slot=data['time_slot']
         )
         db.session.add(new_appointment)
         db.session.commit()
-        return jsonify({'message': 'Appointment added successfully', 'appointment': new_appointment.to_dict()}), 201
+
+        return jsonify({
+            'message': 'Appointment added successfully',
+            'appointment': new_appointment.to_dict()
+        }), 201
 
     except Exception as e:
         db.session.rollback()
-        return jsonify({'error': 'Failed to add the appointment', 'details': str(e)}), 500
+        return jsonify({
+            'error': 'Failed to add the appointment',
+            'details': str(e)
+        }), 500
 
 @bp.route('/get-busy-time-slots', methods=['GET'])
 def get_busy_time_slots():
