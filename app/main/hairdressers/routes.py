@@ -131,7 +131,7 @@ def list_comments(hd_id):
     return jsonify(comments), 200
 
 @bp.route('/<int:hd_id>/comments', methods=['POST'])
-@require_auth
+#@require_auth
 def create_comment(hd_id):
     Hairdresser.query.get_or_404(hd_id)
     data = request.get_json() or {}
