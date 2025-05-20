@@ -122,3 +122,23 @@ def delete_appointment(appointment_id):
     except Exception as e:
         db.session.rollback()
         return jsonify({'error': 'Failed to cancel', 'details': str(e)}), 500
+
+@bp.route('get-clients-appointments')
+def get_clients_appointments():
+    auth_header = request.headers.get('Authorization')
+    if not auth_header or not auth_header.startswith('Bearer '):
+        return jsonify({'error': 'Missing or invalid authorization token'}), 401
+
+    token = auth_header.split(' ')[1]
+    try:
+        decoded_token = jwt.decode(
+            token,
+            current_app.config['SECRET_KEY'],
+            algorithms=['HS256']
+        )
+        client_id = decoded_token['user_id']
+    except InvalidTokenError:
+        return jsonify({'error': 'Invalid or expired token'}), 401
+
+    clients_appointments = Appointment.query.filter(Appointment.client_id == client_id).all()
+    return jsonify([appointment.to_dict() for appointment in clients_appointments])
