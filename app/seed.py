@@ -3,6 +3,7 @@
 import json
 import random
 from datetime import datetime
+
 from app.extensions import db
 from app.main.models.hairdresser import Hairdresser
 from app.main.models.comment import Comment
@@ -67,10 +68,10 @@ COMMENTS_JSON = [
 ]
 
 SERVICES_JSON = [
-    {"serviceName": "Strzyżenie Męskie", "price": 50,  "time": 30, "availability": "dostępne", "description": "Opis strzyżenia męskiego."},
-    {"serviceName": "Strzyżenie Damskie","price": 70,  "time": 45, "availability": "dostępne", "description": "Opis strzyżenia damskiego."},
-    {"serviceName": "Manicure",          "price": 60,  "time": 40, "availability": "dostępne", "description": "Opis manicure."},
-    {"serviceName": "Farbowanie włosów","price": 120, "time": 90, "availability": "dostępne", "description": "Opis farbowania włosów."}
+    {"serviceName": "Strzyżenie Męskie",   "price": 50,  "time": 30, "availability": "dostępne", "description": "Opis strzyżenia męskiego."},
+    {"serviceName": "Strzyżenie Damskie",   "price": 70,  "time": 45, "availability": "dostępne", "description": "Opis strzyżenia damskiego."},
+    {"serviceName": "Manicure",             "price": 60,  "time": 40, "availability": "dostępne", "description": "Opis manicure."},
+    {"serviceName": "Farbowanie włosów",    "price": 120, "time": 90, "availability": "dostępne", "description": "Opis farbowania włosów."}
 ]
 
 PRODUCTS_JSON = [
@@ -110,7 +111,7 @@ def seed_database():
     if Hairdresser.query.first():
         return
 
-    # 1) Fryzjerzy + komentarze
+    # 1) Fryzjerzy + ich komentarze
     for idx, entry in enumerate(HAIRDRESSERS_JSON):
         hd = Hairdresser(
             firstName  = entry['firstName'],
@@ -119,7 +120,7 @@ def seed_database():
             rating     = entry['rating']
         )
         db.session.add(hd)
-        db.session.flush()  # aby hd.id było od razu dostępne
+        db.session.flush()
 
         for c in COMMENTS_JSON[idx]:
             comment = Comment(
@@ -163,19 +164,18 @@ def seed_database():
 
     db.session.commit()
 
-    # 5) Wizyty z losowym fryzjerem
+    # 5) Wizyty (z losowym fryzjerem i domyślnie bez oceny)
     hairdressers = Hairdresser.query.all()
     for entry in APPOINTMENTS_JSON:
-        chosen = random.choice(hairdressers)
         appt = Appointment(
             client_id=entry['client_id'],
             service_id=entry['service_id'],
-            hairdresser_id=chosen.id,
+            hairdresser_id=random.choice(hairdressers).id,
             date=datetime.fromisoformat(entry['date']),
-            time_slot=entry['time_slot']
+            time_slot=entry['time_slot'],
+            rating=None  # domyślnie brak oceny
         )
         db.session.add(appt)
 
     db.session.commit()
-
     print("✅ Baza została zasilona przykładowymi danymi.")
