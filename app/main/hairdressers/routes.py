@@ -7,7 +7,7 @@ from app.main.models.comment import Comment
 import json
 
 @bp.route('/', methods=['GET'])
-@require_auth
+#@require_auth
 def hairdresser_list():
     hairdressers = Hairdresser.query.all()
     result = []
