@@ -166,8 +166,6 @@ def rate_appointment(appointment_id):
     appt = Appointment.query.get(appointment_id)
     if not appt:
         return jsonify({'error': 'Appointment not found'}), 404
-    if appt.date > datetime.utcnow():
-        return jsonify({'error': 'Cannot rate a future appointment'}), 403
 
     try:
         new_rating = int(data['rating'])
