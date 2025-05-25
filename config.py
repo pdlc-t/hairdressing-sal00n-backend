@@ -13,7 +13,6 @@ class Config:
     # w przeciwnym razie zapisz plik app.db w katalogu głównym projektu
     SQLALCHEMY_DATABASE_URI = (
             os.environ.get('DATABASE_URI')
-            or f"sqlite:///{PROJECT_ROOT / 'app.db'}"
     )
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     JSON_AS_ASCII = False  # pozwala na prawidłowe polskie znaki
