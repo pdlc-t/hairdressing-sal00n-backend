@@ -10,7 +10,7 @@ if errorlevel 1 (
 
 python -m venv .venv
 
-call venv\Scripts\activate
+call .venv\Scripts\activate
 
 
 if exist requirements.txt (
